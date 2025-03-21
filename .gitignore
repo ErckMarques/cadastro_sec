@@ -1,0 +1,29 @@
+# ambiente virtual
+venv/
+
+# arquivos de cache do python
+*.pyc
+__pycache__/
+
+# instancia do bacno de dados
+instance/
+
+# cache e processante de extensoes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# arquivos de instalação do pacote
+dist/
+build/
+*.egg-info/
+
+# arquivo de automatização
+Makefile
+
+# arquivos de variaveis de ambiente
+.env
+*/.flaskenv
+settings.toml
+
+*/Todo
