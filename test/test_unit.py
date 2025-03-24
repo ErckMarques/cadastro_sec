@@ -2,7 +2,6 @@ import pytest
 from pathlib import Path
 from pandas import DataFrame
 
-
 from cadastro import extrair_dados, extrair_dados_completos
 from cadastro import DADOS_EXCEL, DADOS_OUTPUT
 
