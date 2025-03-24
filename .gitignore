@@ -1,6 +1,9 @@
 # ambiente virtual
 venv/
 
+# arquivos de dados
+dados/
+
 # arquivos de cache do python
 *.pyc
 __pycache__/

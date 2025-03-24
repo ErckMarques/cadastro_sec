@@ -20,7 +20,7 @@ def test_extrair_dados():
     dados = extrair_dados()
     
     assert isinstance(dados, DataFrame), 'Os dados extraídos não são um DataFrame'
-    assert dados.empty is False, 'Os dados extraídos estão vazios'
+    assert not dados.empty, 'o Dataframe retornado está vazio'
 
 # @pytest.mark.skip()
 def test_extrair_dados_completos():
@@ -29,3 +29,4 @@ def test_extrair_dados_completos():
     dados = extrair_dados_completos()
 
     assert dados.notna().all().all(), 'Ainda existem dados faltando'
+    assert not dados.duplicated().all(), 'Ainda existem dados duplicados'
