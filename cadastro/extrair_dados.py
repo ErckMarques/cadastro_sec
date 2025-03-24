@@ -6,6 +6,12 @@ _cadastros: DataFrame | None = None
 _cadastros_completos: DataFrame | None = None
 _header_sheets = ['NOME ', 'APELIDO ', 'ENDEREÇO', 'REFERENCIA', 'CPF', 'TELEFONE']
 
+def _normalizar_dados(dados: DataFrame) -> None:
+    '''Esta função normaliza os dados de cadastro, deixando todo o texto em maiúsculo e removendo espaços em branco.'''
+    for coluna in dados.columns:
+        if dados[coluna].dtype == 'object':
+            dados[coluna] = dados[coluna].str.upper().str.strip()
+
 def extrair_dados() -> DataFrame:
     '''Esta função extrai os dados de cadastro de todos os meses e retorna um DataFrame com todos os dados.'''
     global _cadastros
