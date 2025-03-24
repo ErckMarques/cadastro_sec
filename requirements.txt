@@ -1,7 +1,10 @@
 attrs==25.3.0
+-e git+https://github.com/ErckMarques/cadastro_sec.git@5aff86572ff89ebe0856103b80ed7475641f0c61#egg=cadastro
 certifi==2025.1.31
 cffi==1.17.1
+charset-normalizer==3.4.1
 colorama==0.4.6
+coverage==7.7.1
 et_xmlfile==2.0.0
 h11==0.14.0
 idna==3.10
@@ -15,8 +18,12 @@ pluggy==1.5.0
 pycparser==2.22
 PySocks==1.7.1
 pytest==8.3.5
+pytest-cov==6.0.0
+pytest-mock==3.14.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
 pytz==2025.1
+requests==2.32.3
 selenium==4.29.0
 six==1.17.0
 sniffio==1.3.1
@@ -26,5 +33,6 @@ trio-websocket==0.12.2
 typing_extensions==4.12.2
 tzdata==2025.1
 urllib3==2.3.0
+webdriver-manager==4.0.2
 websocket-client==1.8.0
 wsproto==1.2.0
