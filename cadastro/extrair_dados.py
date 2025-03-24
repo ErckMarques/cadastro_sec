@@ -31,6 +31,7 @@ def extrair_dados() -> DataFrame:
     return _cadastros
 
 def extrair_dados_completos(export: bool = True) -> DataFrame:
+    '''Esta função retorna os dados de cadastro completos, ou seja, sem dados faltantes ou duplicados.'''
     global _cadastros
     global _cadastros_completos
     global _header_sheets
