@@ -46,8 +46,9 @@ class Cadastrar:
         if self._wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input'))):
             
             log.info('Identificando Campos do formulário de Cadastro')
-            nome, apelido, cpf, phone, local, ref, btn_cad = self._loc_campos(wait= self._wait).values()
-
+            elementos = self._loc_campos()
+            nome = elementos.get('name'); apelido = elementos.get('apelido'); cpf = elementos.get('cpf'); phone = elementos.get('phone')
+            ref = elementos.get('referencia'); local = elementos.get('local'); btn_cad = elementos.get('btn')
             log.info('Preenchendo formulário com os dados de cadastro completo')
             for row in self._dados_cadastro.itertuples():
                 log.info(f'Cadastrando {row.NOME}, {row.CPF}')
@@ -77,8 +78,9 @@ class Cadastrar:
         
         # Adiciona o último botão encontrado com a chave 'botao'
         botoes = self._driver.find_elements(By.TAG_NAME, 'button')
-        if botoes:
-            web_elements['botao'] = botoes[-1]
+        for btn in botoes:
+            if btn.get_attribute('text') == 'Avançar':
+                web_elements['btn'] = btn
         
         return web_elements
         
