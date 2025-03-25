@@ -3,6 +3,7 @@ venv/
 
 # arquivos de dados
 dados/
+*ipynb
 
 # arquivos de cache do python
 *.pyc

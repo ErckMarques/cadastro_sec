@@ -2,6 +2,7 @@ import logging
 
 from pandas import concat, read_excel
 from pandas import  DataFrame, ExcelWriter
+from re import compile, Pattern
 
 from cadastro import DADOS_EXCEL, DADOS_OUTPUT, MESES
 
@@ -12,6 +13,7 @@ class ExtratorDadosCadastro:
         self._cadastros: DataFrame | None = None
         self._cadastros_completos: DataFrame | None = None
         self._cadastros_faltantes: DataFrame | None = None
+        self._cadastros_nao_validados: DataFrame | None = None
         self._header_sheets = ['NOME', 'APELIDO', 'ENDEREÇO', 'REFERENCIA', 'CPF', 'TELEFONE']
         
     @property
@@ -26,7 +28,7 @@ class ExtratorDadosCadastro:
         '''Esta função normaliza os dados de cadastro, deixando todo o texto em maiúsculo e removendo espaços em branco.'''
         for coluna in dados.columns:
             if dados[coluna].dtype == 'object':
-                dados[coluna] = dados[coluna].str.upper().str.strip()
+                dados[coluna] = dados[coluna].str.upper().str.strip()        
     
     def extrair_dados(self) -> None:
         '''Esta função extrai os dados de cadastro de todos os meses e gera um DataFrame com todos os dados.'''
