@@ -4,7 +4,7 @@ from cadastro import DADOS_EXCEL, DADOS_OUTPUT, MESES
 
 _cadastros: DataFrame | None = None
 _cadastros_completos: DataFrame | None = None
-_header_sheets = ['NOME ', 'APELIDO ', 'ENDEREÇO', 'REFERENCIA', 'CPF', 'TELEFONE']
+_header_sheets = ['NOME', 'APELIDO', 'ENDEREÇO', 'REFERENCIA', 'CPF', 'TELEFONE']
 
 def _normalizar_dados(dados: DataFrame) -> None:
     '''Esta função normaliza os dados de cadastro, deixando todo o texto em maiúsculo e removendo espaços em branco.'''
