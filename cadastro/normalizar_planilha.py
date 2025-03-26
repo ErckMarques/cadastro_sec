@@ -3,7 +3,7 @@ Este módulo contém a classe NormalizarXl,
 que é responsável por normalizar os dados de um arquivo excel com formato já definido.
 '''
 
-from pandas import DataFrame, read_excel, concat
+from pandas import DataFrame, concat
 from pandas import ExcelWriter, Series
 from re import compile, match ,Pattern
 
@@ -12,56 +12,55 @@ class NormalizarXl:
     def __init__(self, dados: DataFrame):
         self._dados = dados
         self._column_names = ['NOME', 'APELIDO', 'ENDEREÇO', 'CPF', 'TELEFONE']
-        self._normalizados: DataFrame | None = None
-        self._invalidos: DataFrame | None = None
+        self._normalizados: DataFrame = DataFrame(None)
+        self._invalidos: DataFrame = DataFrame(None)
+    
+    @property
+    def dados_normalizados(self) -> DataFrame:
+        '''Retorna os dados normalizados'''
+        return self._normalizados
+    
+    @property
+    def dados_invalidos(self) -> DataFrame:
+        '''Retorna os dados inválidos'''
+        return self._invalidos
+    
+    def _normalizar_apelido():
+        '''Função para 'normalizar' o apelido, quando este não existir utilizar o primeiro nome da pessoa'''
+        pass
+
+    def _normalizar_endereco():
+        '''Função para normalizar o endereço, corrigindo alguns nomes e localidades.'''
+        pass
 
     def _normalizar_referencia(self):
-        '''Esta função normaliza o endereço dos dados de cadastro.'''
-        self._dados['ENDEREÇO'] = self._dados['ENDEREÇO'].str.upper().str.strip().str.replace(')', '')
+        '''Esta função normaliza as referencias dos dados de cadastro.'''
+        self._dados['ENDEREÇO'] = self._dados['ENDEREÇO'].str.upper().str.strip().str.replace(')', '').str.upper()
     
     def _normalizar_cpf(self) -> None:
         '''Esta função normaliza o CPF dos dados de cadastro.'''
         
-        regex = compile(r'\d{3}\.\d{3}\.\d{3}-\d{2}')
+        # Remove caracteres que não sejam dígitos e os substitui por ''
+        cpfs = self._dados['CPF'].astype(str).str.replace(r'[^\d]', '', regex=True).str.strip()
+        # mascara para cpfs com 11 digitos
+        mask_validos = cpfs.str.len() == 11
 
-    def _formatar_telefone(serie_telefone: Series) -> Series:
-        """
-        Valida e formata a série 'TELEFONE' para o padrão 9XXXX-XXXX,
-        adicionando o DDD '81' aos números válidos.
+        # Separa válidos/inválidos
+        self._invalidos = concat(self._invalidos, self._dados[~mask_validos].copy(), ignore_index=True)
+        self._dados = self._dados[mask_validos].copy()
 
-        Args:
-            serie_telefone: Série pandas com números de telefone.
+    def _normalizar_telefone(self):
 
-        Returns:
-            Série com telefones formatados (81 + 9XXXX-XXXX) ou None para inválidos.
-        """
-        telefones_formatados = []
-        
-        for telefone in serie_telefone:
-            # Converte para string e remove espaços e caracteres especiais
-            telefone = str(telefone).strip().replace(' ', '').replace('-', '').replace('.', '')
-            
-            # Verifica se já está no formato 9XXXX-XXXX
-            if match(r'^9\d{4}-\d{4}$', telefone):
-                telefones_formatados.append(f'81{telefone}')
-                continue
-            
-            # Tenta corrigir números com 9 dígitos (sem hífen)
-            if match(r'^9\d{8}$', telefone):
-                telefone_formatado = f"{telefone[:5]}-{telefone[5:]}"
-                telefones_formatados.append(f'81{telefone_formatado}')
-                continue
-            
-            # Tenta corrigir números com 8 dígitos (adiciona o '9' no início)
-            if match(r'^\d{8}$', telefone):
-                telefone_formatado = f"9{telefone[:4]}-{telefone[4:]}"
-                telefones_formatados.append(f'81{telefone_formatado}')
-                continue
-            
-            # Se não for possível formatar, mantém o original (ou pode retornar None)
-            telefones_formatados.append(telefone) # (para manter o valor original)
-        
-        return Series(telefones_formatados, index=serie_telefone.index, name='TELEFONE_FORMATADO')
+        # remove caracteres que não sejam dígitos e espaços em branco
+        self._dados['TELEFONE'] = self._dados['TELEFONE'].astype(str).str.replace(r'[^\d]', '', regex=True).str.strip()
     
     def normalizar(self) -> DataFrame:
-        '''Retorna uma dataframe normalizado'''
+        '''Aplica todas as normalizaçãoes para o conjunto de dados e os retorna(?)'''
+        if self._normalizados is None:
+            self._normalizar_apelido()
+            self._normalizar_endereco()
+            self._normalizar_referencia()
+            self._normalizar_cpf()
+            self._normalizar_telefone()
+
+        return self.dados_normalizados
