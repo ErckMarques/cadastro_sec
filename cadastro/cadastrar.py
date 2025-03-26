@@ -55,7 +55,7 @@ class Cadastrar:
                 nome.send_keys(row.NOME)
                 apelido.send_keys(row.APELIDO)
                 cpf.send_keys(row.CPF)
-                phone.send_keys(row.TELEFONE)
+                phone.send_keys('81' + str(row.TELEFONE))
                 ref.send_keys(row.REFERENCIA)
                 local.select_by_value(row.ENDEREÇO)
                 btn_cad.click()
