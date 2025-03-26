@@ -30,7 +30,7 @@ class NormalizarXl:
         pass
 
     def _normalizar_endereco():
-        '''Função para normalizar o endereço, corrigindo alguns nomes e localidades.'''
+        '''Função para normalizar o endereço, corrigindo alguns nomes e localidades. extrair o texto '()' com regex.'''
         pass
 
     def _normalizar_referencia(self):
