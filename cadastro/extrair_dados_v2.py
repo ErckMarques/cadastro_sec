@@ -53,11 +53,12 @@ class ExtratorDadosCadastro:
         self._cadastros_completos = self._cadastros.dropna().drop_duplicates()
     
     def extrair_dados_faltantes(self) -> None:
-        '''Esta função extrai os dados de cadastro que estão faltando, ou seja, com ao menos um dado faltante.'''
+        '''Esta função extrai os dados de cadastro que estão faltando, ou seja, com ao menos um dado faltante. 
+        Também remove dados duplicados.'''
         if self._cadastros is None:
             self.extrair_dados()
         
-        self._cadastros_faltantes = self._cadastros[self._cadastros[['REFERENCIA', 'CPF', 'TELEFONE']].isna().any(axis=1)]
+        self._cadastros_faltantes = self._cadastros[self._cadastros[['REFERENCIA', 'CPF', 'TELEFONE']].isna().any(axis=1)].drop_duplicates()
 
     def extrair_e_classificar_dados(self) -> None:
         '''Esta função extrai os dados de cadastro, os dados completos e os dados faltantes.'''
@@ -65,8 +66,9 @@ class ExtratorDadosCadastro:
             self.extrair_dados()
             self.extrair_dados_completos()
             self.extrair_dados_faltantes()
+            logging.info('Os dados já foram extraídos e classificados.')
             return
-        logging.info('Os dados já foram extraídos e classificados.')
+        logging.error('Ocorreu um erro ao tentar extrair os dados.')
 
     def exportar_relatorio(self) -> None:
         '''Esta função exporta um relatorio com todos os dados, 
@@ -80,11 +82,18 @@ class ExtratorDadosCadastro:
                 'Alguns dados não foram extraídos e classificados. '
                 'Por favor execute o método extrair_e_classificar_dados() antes de exportar o relatório.'
             )
-
-        with ExcelWriter(DADOS_OUTPUT, engine='openpyxl') as writer:
-            self._cadastros.to_excel(writer, sheet_name='CADASTRO GERAL', startrow=2, index=False)
-            self._cadastros_completos.to_excel(writer, sheet_name='CADASTROS COMPLETOS', startrow=2, index=False)
-            self._cadastros_faltantes.to_excel(writer, sheet_name='CADASTROS FALTANTES', startrow=2, index=False)
+        try:
+            with ExcelWriter(DADOS_OUTPUT, engine='openpyxl') as writer:
+                self._cadastros.to_excel(writer, sheet_name='CADASTRO GERAL', startrow=2, index=False)
+                self._cadastros_completos.to_excel(writer, sheet_name='CADASTROS COMPLETOS', startrow=2, index=False)
+                self._cadastros_faltantes.to_excel(writer, sheet_name='CADASTROS FALTANTES', startrow=2, index=False)
+                logging.info(f'''
+                Ao longo de 2024 houveram: {len(self.cadastros)} solicitações de água;
+                Das quais: {len(self.cadastros_completos) + len(self._cadastros_faltantes)} é o número de solicitantes.
+                Destes, apenas {len(self.cadastros_completos)} estão com todos os dados e {len(self._cadastros_faltantes)} tem alguma informação pendente
+                ''')
+        except Exception as e:
+            logging.error('O seguinte erro ocorreu:', e)
 
 if __name__ == '__main__':
     extrator = ExtratorDadosCadastro()
