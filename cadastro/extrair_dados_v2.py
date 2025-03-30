@@ -62,13 +62,15 @@ class ExtratorDadosCadastro:
 
     def extrair_e_classificar_dados(self) -> None:
         '''Esta função extrai os dados de cadastro, os dados completos e os dados faltantes.'''
-        if None in (self._cadastros, self._cadastros_completos, self._cadastros_faltantes):
-            self.extrair_dados()
-            self.extrair_dados_completos()
-            self.extrair_dados_faltantes()
-            logging.info('Os dados já foram extraídos e classificados.')
-            return
-        logging.error('Ocorreu um erro ao tentar extrair os dados.')
+        try:  
+            if None in (self._cadastros, self._cadastros_completos, self._cadastros_faltantes):
+                self.extrair_dados()
+                self.extrair_dados_completos()
+                self.extrair_dados_faltantes()
+                logging.info('Os dados já foram extraídos e classificados.')
+                return
+        except Exception as e:
+            logging.error('Ocorreu um erro ao tentar extrair os dados.', e)
 
     def exportar_relatorio(self) -> None:
         '''Esta função exporta um relatorio com todos os dados, 
