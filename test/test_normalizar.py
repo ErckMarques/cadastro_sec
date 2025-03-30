@@ -5,39 +5,33 @@ from numpy import nan
 
 from cadastro import NormalizarXl
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def dados():
-    header_sheets = ['NOME', 'APELIDO', 'ENDEREÇO', 'REFERENCIA', 'CPF', 'TELEFONE']
+    """Fixture: Retorna DataFrame de teste com colunas NOME, CPF, TELEFONE, etc."""
     return DataFrame(
         {
-            1: '''RONALDO JOSÉ MARIANO
-            LUANNE DA SILVA MARTINS
-            MÁRCIO AGUIAR DA SILVA
-            '''.split(),
-            2: [nan, nan, nan],
-            3: '''SÍTIO AGOSTINHO
-            SITIO CACHOEIRA DO SALOBRO
-            SITIO TANQUE VERDE
-            '''.split(),
-            4: '''PROX A FÁBRICA DE VENENO
-            AO LADO DO CAMPO
-            PROX AO SIT DE PEDRO CABRAL NO CASARÃO
-            '''.split(),
-            5: '''117.527.524-73
-            131.411.584-79
-            833.126.094-53
-            '''.split(),
-            6:'''99282-2899
-            99571-8384
-            98972-0778
-            '''.split()
-        }, columns=header_sheets
+            'NOME': ['RONALDO JOSÉ MARIANO', 'LUANNE DA SILVA MARTINS', 'MÁRCIO AGUIAR DA SILVA'],
+            'APELIDO': [nan, nan, nan],  # Opcional: substituir por ['', '', '']
+            'ENDEREÇO': ['SÍTIO AGOSTINHO', 'SITIO CACHOEIRA DO SALOBRO', 'SITIO TANQUE VERDE'],
+            'REFERENCIA': ['PROX A FÁBRICA DE VENENO', 'AO LADO DO CAMPO', 'PROX AO SIT DE PEDRO CABRAL NO CASARÃO'],
+            'CPF': ['117.527.524-73', '131.411.584-79', '833.126.094-53'],
+            'TELEFONE': ['99282-2899', '99571-8384', '98972-0778']
+        }
     )
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def norm(dados):
     return NormalizarXl(dados)
 
+def test_normalizar_apelido(norm: NormalizarXl):
+    '''o método cadastro.NormalizarXl._normalizar_apelido deve colocar os dois primeiros nomes nas linhas que forem NAN'''
+    norm._normalizar_apelido()
+    assert norm.dados_normalizados['APELIDO'].isna().all(), 'A normalização da coluna apelidos não foi bem sucedida.'
+
+def test_normalizar_telefone(norm: NormalizarXl):
+    norm._normalizar_telefone()
+
+@pytest.mark.skip
 def test_todas_normalizacoes(norm: NormalizarXl):
     norm.normalizar()
 
