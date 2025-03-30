@@ -25,9 +25,10 @@ class NormalizarXl:
         '''Retorna os dados inválidos'''
         return self._invalidos
     
-    def _normalizar_apelido():
+    def _normalizar_apelido(self):
         '''Função para 'normalizar' o apelido, quando este não existir utilizar o primeiro nome da pessoa'''
-        pass
+        nomes: Series = self._dados['NOME']; apelido: Series = self._dados['APELIDO']
+
 
     def _normalizar_endereco():
         '''Função para normalizar o endereço, corrigindo alguns nomes e localidades. extrair o texto '()' com regex.'''
@@ -49,10 +50,24 @@ class NormalizarXl:
         self._invalidos = concat(self._invalidos, self._dados[~mask_validos].copy(), ignore_index=True)
         self._dados = self._dados[mask_validos].copy()
 
-    def _normalizar_telefone(self):
-
-        # remove caracteres que não sejam dígitos e espaços em branco
-        self._dados['TELEFONE'] = self._dados['TELEFONE'].astype(str).str.replace(r'[^\d]', '', regex=True).str.strip()
+    def _normalizar_telefone(self) -> None:
+        '''Formata telefones válidos (9XXXX-XXXX) e separa inválidos.'''
+        telefones = self._dados['TELEFONE'].astype(str).str.replace(r'[^\d]', '', regex=True)
+        
+        # Identifica telefones válidos (9 dígitos, começando com 9)
+        mask_validos = telefones.str.match(r'^9?\d{8}$')  # Aceita 8 ou 9 dígitos
+        
+        # Formata os válidos: 81 + 9XXXX-XXXX
+        telefones_validos = telefones[mask_validos].str.replace(
+            r'^9?(\d{4})(\d{4})$', 
+            r'9\1-\2', 
+            regex=True
+        )
+        
+        # Atualiza DataFrame
+        self._dados.loc[mask_validos, 'TELEFONE'] = telefones_validos
+        self._invalidos = self._dados[~mask_validos].copy()
+        self._dados = self._dados[mask_validos].copy()
     
     def normalizar(self) -> DataFrame:
         '''Aplica todas as normalizaçãoes para o conjunto de dados e os retorna(?)'''
