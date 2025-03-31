@@ -11,3 +11,4 @@ from cadastro.extrair_dados import extrair_dados, extrair_dados_completos
 from cadastro.extrair_dados_v2 import ExtratorDadosCadastro
 from cadastro.cadastrar import Cadastrar
 from cadastro.normalizar_planilha import NormalizarXl
+from cadastro._log import log
