@@ -69,6 +69,7 @@ class ExtratorDadosCadastro:
                 self.extrair_dados_faltantes()
                 logging.info('Os dados já foram extraídos e classificados.')
                 return
+            logging.info('Retornando Dados')
         except Exception as e:
             logging.error('Ocorreu um erro ao tentar extrair os dados.', e)
 
