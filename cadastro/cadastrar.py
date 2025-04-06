@@ -1,9 +1,11 @@
+from time import sleep
 from pandas import DataFrame
 
 from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import InvalidElementStateException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -51,19 +53,40 @@ class Cadastrar:
             nome = elementos.get('name'); apelido = elementos.get('apelido'); cpf = elementos.get('cpf'); phone = elementos.get('phone')
             ref = elementos.get('referencia'); local = elementos.get('local'); btn_cad = elementos.get('btn')
             log.info('Preenchendo formulário com os dados de cadastro completo')
-            for row in self._dados_cadastro.itertuples():
-                log.info(f'Cadastrando {row.NOME}, {row.CPF}')
-                nome.send_keys(row.NOME)
-                apelido.send_keys(row.APELIDO)
-                cpf.send_keys(row.CPF)
-                phone.send_keys('81' + str(row.TELEFONE))
-                ref.send_keys(row.REFERENCIA)
-                local.select_by_value(row.ENDEREÇO)
-                btn_cad.click()
-                if nome.get_attribute('value') == '':
-                    log.info(f'{row.NOME} cadastrado com sucesso')
-                else:
-                    log.error(f'Erro ao cadastrar {row.NOME}')
+            try:
+                for row in self._dados_cadastro.itertuples():
+                    log.info(f'Cadastrando {row.NOME}, {row.CPF}')
+                    sleep(0.3)
+                    nome.clear()
+                    nome.send_keys(row.NOME)
+                    sleep(0.3)
+                    apelido.clear()
+                    apelido.send_keys(row.APELIDO)
+                    sleep(0.3)
+                    cpf.click()
+                    cpf.clear()
+                    cpf.send_keys(row.CPF)
+                    sleep(0.3)
+                    phone.click()
+                    phone.clear()
+                    phone.send_keys('81' + str(row.TELEFONE))
+                    sleep(0.2)
+                    ref.send_keys(row.REFERENCIA)
+                    sleep(0.1)
+                    local.select_by_value(row.ENDEREÇO)
+                    sleep(0.2)
+                    btn_cad.click()
+                    if nome.get_attribute('value') == '':
+                        log.info(f'{row.NOME} cadastrado com sucesso')
+                    else:
+                        log.error(f'Erro ao cadastrar {row.NOME}')
+                        not_cadastrados.append(row)
+            except InvalidElementStateException as e:
+                log.error('Erro ao acessar um dos elementos da ficha cadastral', e)
+                not_cadastrados.append(row)
+            except Exception as e:
+                log.error(f'Aconteceu um erro ao cadastrar os dados de {row.NOME}: {row.CPF}')
+                not_cadastrados.append(row)
 
     def _loc_campos(self) -> dict[str, WebElement | Select]:
         """Localiza e retorna um dicionário de elementos web (input, select, button) com chaves específicas."""
