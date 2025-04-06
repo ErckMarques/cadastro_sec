@@ -7,6 +7,7 @@ MESES = 'JANEIRO,FEVEREIRO,MARÇO,ABRIL,MAIO,JUNHO,JULHO,AGOSTO,SETEMBRO,OUTUBRO
 
 DADOS_SITE = dotenv_values(Path().cwd().joinpath('.env'))
 
+from cadastro._log import log
 from cadastro.extrair_dados import extrair_dados, extrair_dados_completos
 from cadastro.extrair_dados_v2 import ExtratorDadosCadastro
 from cadastro.cadastrar import Cadastrar
