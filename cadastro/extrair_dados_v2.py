@@ -1,104 +1,102 @@
-import logging
-
 from pandas import concat, read_excel
 from pandas import  DataFrame, ExcelWriter
-from re import compile, Pattern
 
+from cadastro._log import log
+from cadastro._typings import CadastroProxy, Cadastro
 from cadastro import DADOS_EXCEL, DADOS_OUTPUT, MESES
+from cadastro.normalizar_dados import NormalizarDadosCadastro
 
 class ExtratorDadosCadastro:
-    """Esta classe é responsável por extrair os dados de cadastro de um arquivo excel e normalizá-los."""
+    """Esta classe é responsável por extrair os dados de cadastro de um arquivo excel."""
     
     def __init__(self):
-        self._cadastros: DataFrame | None = None
-        self._cadastros_completos: DataFrame | None = None
-        self._cadastros_faltantes: DataFrame | None = None
-        self._cadastros_nao_validados: DataFrame | None = None
+        self._cadastros: Cadastro = CadastroProxy.get_cadastro()
+        self._normal: NormalizarDadosCadastro | None = None
         self._header_sheets = ['NOME', 'APELIDO', 'ENDEREÇO', 'REFERENCIA', 'CPF', 'TELEFONE']
-        
-    @property
-    def cadastros(self) -> DataFrame:
-        return self._cadastros
     
-    @property
-    def cadastros_completos(self) -> DataFrame:
-        return self._cadastros_completos
-    
-    def _normalizar_dados(self, dados: DataFrame) -> None:
-        '''Esta função normaliza os dados de cadastro, deixando todo o texto em maiúsculo e removendo espaços em branco.'''
-        for coluna in dados.columns:
-            if dados[coluna].dtype == 'object':
-                dados[coluna] = dados[coluna].str.upper().str.strip()        
-    
-    def extrair_dados(self) -> None:
-        '''Esta função extrai os dados de cadastro de todos os meses e gera um DataFrame com todos os dados.'''
+    def _normalizar_dados(self) -> None:
+        '''Esta função normaliza os dados de cadastro com a classe NormalizarDadosCadastro.
+        A normalização é feita da seguinte forma:
+            1. resolvendo apelidos faltantes
+            2. verificando o formato dos cpf's (ainda não os valida)
+            3. normalizando o endereço extraindo o texto entre () com aplicação vetorial de regex
+            4. normalizando a referencia do endereço
+            5. normalizando o telefone (ainda não os valida)
+            6. deixa todo o texto em uppercase
+        '''
+        if self._normal is None:
+            self._normal = NormalizarDadosCadastro(self._cadastros['geral'])
+            
+        self._cadastros = self._normal.normalizar() # Normaliza os dados de cadastro. Retorna as chaves 'geral' e 'invalidados'.
 
-        if self._cadastros is not None:
+    def _extrair_dados(self) -> None:
+        '''Esta função extrai os dados de cadastro de todos os meses e gera um DataFrame com todos os dados. 
+        Remove dados duplicados e normaliza os dados.
+        '''
+        
+        # verifica se os dados já foram extraídos, se sim, retorna os dados já extraídos
+        if not self._cadastros.get('geral').empty:
+            log.info('Os dados já foram extraídos. Acesse-os chamando CadastroProxy.get_cadastro(). Retornando...')
             return
 
+        # inicia o processo de extração dos dados
+        log.info('Iniciando a extração dos dados.')
         aux = list()
         for mes in MESES:
+            log.info(f'Extraindo dados do mês de {mes}')
+            # lê os dados do mês e adiciona ao DataFrame auxiliar
             df = read_excel(DADOS_EXCEL, sheet_name=mes, header=6, usecols=self._header_sheets, names=self._header_sheets)
             aux.append(df)
     
-        self._cadastros = concat(aux, ignore_index=True)
-        self._normalizar_dados(self._cadastros)
-    
-    def extrair_dados_completos(self) -> None:
-        '''Esta função extrai os dados de cadastro completos, ou seja, sem dados faltantes ou duplicados.'''
+        # concatena os dados de todos os meses e remove duplicados
+        self._cadastros['geral'] = concat(aux, ignore_index=True).drop_duplicates()
+        log.info('Dados extraídos com sucesso!')
 
-        if self._cadastros is None:
-            self.extrair_dados()
+    def _extrair_dados_completos(self) -> None:
+        '''Esta função extrai os dados de cadastro completos, ou seja, sem dados faltantes.'''
+
+        if not self._cadastros.get('geral').empty:
+            log.info('Os dados já foram extraídos. Acesse-os chamando CadastroProxy.get_cadastro(). Retornando...')
+            self._extrair_dados()
         
-        self._cadastros_completos = self._cadastros.dropna().drop_duplicates()
+        if not self._cadastros.get('completos').empty:
+            log.info("Os dados completos já foram extraídos. Acesse-os chamando CadastroProxy.get_cadastro()['completos']. Retornando...")
+            return
+
+        log.info('Extraindo dados completos...')
+        self._cadastros['completos'] = self._cadastros.get('geral').dropna()
     
-    def extrair_dados_faltantes(self) -> None:
-        '''Esta função extrai os dados de cadastro que estão faltando, ou seja, com ao menos um dado faltante. 
-        Também remove dados duplicados.'''
-        if self._cadastros is None:
-            self.extrair_dados()
+    def _extrair_dados_faltantes(self) -> None:
+        '''Esta função extrai os dados de cadastro que estão faltando, ou seja, com ao menos um dado faltante.'''
         
-        self._cadastros_faltantes = self._cadastros[self._cadastros[['REFERENCIA', 'CPF', 'TELEFONE']].isna().any(axis=1)].drop_duplicates()
+        if not self._cadastros.get('geral').empty:
+            log.info('Os dados já foram extraídos. Acesse-os chamando CadastroProxy.get_cadastro(). Retornando...')
+            self._extrair_dados()
+        
+        if not self._cadastros.get('faltantes').empty:
+            log.info("Os dados faltantes já foram extraídos. Acesse-os chamando CadastroProxy.get_cadastro()['faltantes']. Retornando...")
+            return
+
+        log.info('Extraindo dados faltantes...')
+        self._cadastros['faltantes'] = self._cadastros['geral'][self._cadastros['geral'][['REFERENCIA', 'CPF', 'TELEFONE']].isna().any(axis=1)]
 
     def extrair_e_classificar_dados(self) -> None:
-        '''Esta função extrai os dados de cadastro, os dados completos e os dados faltantes.'''
-        try:  
-            if None in (self._cadastros, self._cadastros_completos, self._cadastros_faltantes):
-                self.extrair_dados()
-                self.extrair_dados_completos()
-                self.extrair_dados_faltantes()
-                logging.info('Os dados já foram extraídos e classificados.')
-                return
-            logging.info('Retornando Dados')
-        except Exception as e:
-            logging.error('Ocorreu um erro ao tentar extrair os dados.', e)
-
-    def exportar_relatorio(self) -> None:
-        '''Esta função exporta um relatorio com todos os dados, 
-        os dados que tem ao menos um dado faltante e os dados que estão completos para um arquivo excel.
+        '''Esta função extrai os dados de cadastro, os dados completos e os dados faltantes.
+        Ela também aplica os métodos de normalização aos dados. Também atualiza o dicionário central com os dados extraídos.
         '''
-
-        if (self._cadastros is None or 
-        self._cadastros_completos is None or 
-        self._cadastros_faltantes is None):
-            logging.error(
-                'Alguns dados não foram extraídos e classificados. '
-                'Por favor execute o método extrair_e_classificar_dados() antes de exportar o relatório.'
-            )
-        try:
-            with ExcelWriter(DADOS_OUTPUT, engine='openpyxl') as writer:
-                self._cadastros.to_excel(writer, sheet_name='CADASTRO GERAL', startrow=2, index=False)
-                self._cadastros_completos.to_excel(writer, sheet_name='CADASTROS COMPLETOS', startrow=2, index=False)
-                self._cadastros_faltantes.to_excel(writer, sheet_name='CADASTROS FALTANTES', startrow=2, index=False)
-                logging.info(f'''
-                Ao longo de 2024 houveram: {len(self.cadastros)} solicitações de água;
-                Das quais: {len(self.cadastros_completos) + len(self._cadastros_faltantes)} é o número de solicitantes.
-                Destes, apenas {len(self.cadastros_completos)} estão com todos os dados e {len(self._cadastros_faltantes)} tem alguma informação pendente
-                ''')
+        try:  
+            if (self._cadastros.get('geral').empty and self._cadastros.get('completos').empty and self._cadastros.get('faltantes').empty):
+                self._extrair_dados()
+                self._normalizar_dados()
+                self._extrair_dados_completos()
+                self._extrair_dados_faltantes()
+                log.info('Os dados já foram extraídos e classificados!')
+                
+                log.info('Atualizando o dicionário central...')
+                for key, value in self._cadastros.items():
+                    CadastroProxy.update_cadastro(key, value, self)
+                
+                return
+            log.info('Retornando Dados... Acesse-os chamando CadastroProxy.get_cadastro()')
         except Exception as e:
-            logging.error('O seguinte erro ocorreu:', e)
-
-if __name__ == '__main__':
-    extrator = ExtratorDadosCadastro()
-    extrator.extrair_e_classificar_dados()
-    extrator.exportar_relatorio()
+            log.error('Ocorreu um erro ao tentar extrair os dados.', e)
