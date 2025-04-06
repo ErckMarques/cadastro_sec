@@ -7,6 +7,8 @@ from pandas import DataFrame, concat
 from pandas import ExcelWriter, Series
 from re import compile, match ,Pattern
 
+from cadastro import log
+
 class NormalizarXl:
     
     def __init__(self, dados: DataFrame):
@@ -27,8 +29,10 @@ class NormalizarXl:
     
     def _normalizar_apelido(self):
         '''Função para 'normalizar' o apelido, quando este não existir utilizar o primeiro nome da pessoa'''
-        nomes: Series = self._dados['NOME']; apelido: Series = self._dados['APELIDO']
-
+        try:
+            self._dados['APELIDO'] = self._dados['APELIDO'].str.fillna(self._dados['NOMES'].str.split().str[0])
+        except Exception as e:
+            log.error('Ocorreu um erro normalizar a coluna de apelidos', e)
 
     def _normalizar_endereco():
         '''Função para normalizar o endereço, corrigindo alguns nomes e localidades. extrair o texto '()' com regex.'''
