@@ -3,6 +3,15 @@ from pathlib import Path
 
 DADOS_ENTRADA = Path(__file__).parents[1].joinpath('dados_entrada',)
 DADOS_SAIDA = DADOS_ENTRADA.parent.joinpath('dados_saida')
+
+# verifica e cria a pasta dos arquivos de saida, se ela não existir
+if not DADOS_SAIDA.exists(): 
+    DADOS_SAIDA.mkdir(parents=True, exist_ok=True)
+
+# verifica se a pasta com os arquivos de entrada existe
+if not DADOS_ENTRADA.exists() or not DADOS_ENTRADA.is_dir():
+    raise FileNotFoundError('Diretório com os dados de entrada não existe')
+
 MESES = 'JANEIRO,FEVEREIRO,MARÇO,ABRIL,MAIO,JUNHO,JULHO,AGOSTO,SETEMBRO,OUTUBRO,NOVEMBRO,DEZEMBRO'.split(',')
 
 # VARIAVEIS DO AMBIENTE CARREGADAS DO .env
