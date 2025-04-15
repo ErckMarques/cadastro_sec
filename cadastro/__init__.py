@@ -12,6 +12,10 @@ if not DADOS_SAIDA.exists():
 if not DADOS_ENTRADA.exists() or not DADOS_ENTRADA.is_dir():
     raise FileNotFoundError('Diretório com os dados de entrada não existe')
 
+for item in DADOS_ENTRADA.iterdir():
+    if not item.is_dir() and not len(item.iterdir()):
+        raise FileNotFoundError(f'Diretório "{item.stem}" não existem ou não contém os dados de entrada.')
+
 MESES = 'JANEIRO,FEVEREIRO,MARÇO,ABRIL,MAIO,JUNHO,JULHO,AGOSTO,SETEMBRO,OUTUBRO,NOVEMBRO,DEZEMBRO'.split(',')
 
 # VARIAVEIS DO AMBIENTE CARREGADAS DO .env
