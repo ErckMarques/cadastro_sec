@@ -1,6 +1,6 @@
 from pandas import concat, DataFrame, read_excel
 
-from cadastro import DADOS_EXCEL, DADOS_OUTPUT, MESES
+from cadastro import DADOS_ENTRADA, DADOS_SAIDA, MESES
 
 _cadastros: DataFrame | None = None
 _cadastros_completos: DataFrame | None = None
@@ -22,7 +22,7 @@ def extrair_dados() -> DataFrame:
     
     aux = list()
     for mes in MESES:
-        df = read_excel(DADOS_EXCEL, sheet_name=mes, header=6, usecols=_header_sheets, names=_header_sheets)
+        df = read_excel(DADOS_ENTRADA, sheet_name=mes, header=6, usecols=_header_sheets, names=_header_sheets)
         aux.append(df)
 
     _cadastros = concat(aux, ignore_index=True)
@@ -42,7 +42,7 @@ def extrair_dados_completos(export: bool = True) -> DataFrame:
     _cadastros_completos = _cadastros.dropna().drop_duplicates()
 
     if export:
-        _cadastros_completos.to_excel(DADOS_OUTPUT, sheet_name='CADASTRO_GERAL', startrow=2, index=False)
+        _cadastros_completos.to_excel(DADOS_SAIDA, sheet_name='CADASTRO_GERAL', startrow=2, index=False)
 
     return _cadastros_completos
 

@@ -1,7 +1,7 @@
 from cadastro.models import TemplateExportador
 from pandas import ExcelWriter, DataFrame
 
-from cadastro import DADOS_OUTPUT
+from cadastro import DADOS_SAIDA
 from cadastro._log import log
 from cadastro._typings import CadastroProxy, Cadastro
 
@@ -13,7 +13,7 @@ class Relatorio(TemplateExportador):
         """Gera um relatório a partir dos dados extraídos."""
         dados: Cadastro = CadastroProxy.get_cadastro()
         try:
-            with ExcelWriter(DADOS_OUTPUT, engine='openpyxl') as writer:
+            with ExcelWriter(DADOS_SAIDA, engine='openpyxl') as writer:
                 if not dados['geral'].empty:
                     log.info('Registrando o Cadastros Geral')
                     # Exporta todos os dados extraidos

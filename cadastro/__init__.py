@@ -1,8 +1,8 @@
 from dotenv import dotenv_values
 from pathlib import Path
 
-DADOS_EXCEL = Path(__file__).parents[1].joinpath('dados', 'abastecimento_2024.xlsx')
-DADOS_OUTPUT = DADOS_EXCEL.parent.joinpath('cadastros.xlsx')
+DADOS_ENTRADA = Path(__file__).parents[1].joinpath('dados_entrada',)
+DADOS_SAIDA = DADOS_ENTRADA.parent.joinpath('dados_saida')
 MESES = 'JANEIRO,FEVEREIRO,MARÇO,ABRIL,MAIO,JUNHO,JULHO,AGOSTO,SETEMBRO,OUTUBRO,NOVEMBRO,DEZEMBRO'.split(',')
 
 # VARIAVEIS DO AMBIENTE CARREGADAS DO .env

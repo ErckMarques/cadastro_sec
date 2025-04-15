@@ -3,7 +3,7 @@ from pandas import  DataFrame, ExcelWriter
 
 from cadastro._log import log
 from cadastro._typings import CadastroProxy, Cadastro
-from cadastro import DADOS_EXCEL, DADOS_OUTPUT, MESES
+from cadastro import DADOS_ENTRADA, MESES
 from cadastro.normalizar_dados import NormalizarDadosCadastro
 
 class ExtratorDadosCadastro:
@@ -45,7 +45,7 @@ class ExtratorDadosCadastro:
         for mes in MESES:
             log.info(f'Extraindo dados do mês de {mes}')
             # lê os dados do mês e adiciona ao DataFrame auxiliar
-            df = read_excel(DADOS_EXCEL, sheet_name=mes, header=6, usecols=self._header_sheets, names=self._header_sheets)
+            df = read_excel(DADOS_ENTRADA, sheet_name=mes, header=6, usecols=self._header_sheets, names=self._header_sheets)
             aux.append(df)
     
         # concatena os dados de todos os meses e remove duplicados
