@@ -109,7 +109,7 @@ class NormalizarDadosCadastro(TemplateExportador):
         '''Aplica todas as normalizaçãoes para o conjunto de dados e os retorna(?)'''
         try:
             self._normalizar_apelido()
-            self._normalizar_referencia()
+            self._normalizar_referencia() # deve vir antes de _normalizar_endereco para garantir que a coluna seja normalizada.
             self._normalizar_endereco()
             self._normalizar_cpf()
             self._normalizar_telefone()
