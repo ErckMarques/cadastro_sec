@@ -1,7 +1,6 @@
 import pytest
 
 from pandas import DataFrame, NA
-from numpy import nan
 
 from cadastro.normalizar_dados import NormalizarDadosCadastro
 
@@ -11,11 +10,11 @@ def dados():
     return DataFrame(
         {
             'NOME': ['RONALDO JOSÉ MARIANO', 'LUANNE DA SILVA MARTINS', 'MÁRCIO AGUIAR DA SILVA', 'Ericson Marques'],
-            'APELIDO': [nan, nan, nan, 'Eric'],  # Opcional: substituir por ['', '', '']
+            'APELIDO': [NA, NA, NA, 'Eric'],  # Opcional: substituir por ['', '', '']
             'ENDEREÇO': ['SÍTIO AGOSTINHO (PROX A FÁBRICA DE VENENO)', 'SITIO CACHOEIRA DO SALOBRO', 'SITIO TANQUE VERDE', 'Rua das Flores'],
-            'REFERENCIA': [nan, 'AO LADO DO CAMPO', 'PROX AO SIT DE PEDRO CABRAL NO CASARÃO', ''],
+            'REFERENCIA': [NA, 'AO LADO DO CAMPO', 'PROX AO SIT DE PEDRO CABRAL NO CASARÃO', ''],
             'CPF': ['117.527.524-73', '131.411.584-79', '833.126.094-53', '123.456.789-00'],
-            'TELEFONE': ['99282-2899', '99571-8384', '98972-0778', '99999-9999']
+            'TELEFONE': ['99282-2899', '99571-8384', '98972-0778', '9999-9999']
         }
     )
 
